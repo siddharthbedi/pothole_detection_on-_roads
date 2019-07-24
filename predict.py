@@ -60,9 +60,9 @@ def _main_(args):
     ###############################
 
     if image_path[-4:] == '.mp4':
-        video_out = image_path[:-4] + '_detected' + image_path[-4:]
+        video_out = image_path[:-4] + '_detected_ex' + image_path[-4:]
         video_reader = cv2.VideoCapture(image_path)
-
+	
         nb_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))
         frame_h = int(video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT))
         frame_w = int(video_reader.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -73,15 +73,24 @@ def _main_(args):
                                (frame_w, frame_h))
 
         for i in tqdm(range(nb_frames)):
+
+
             _, image = video_reader.read()
-            
+            rows = image.shape[0]
+            cols = image.shape[1]
+
+            M = cv2.getRotationMatrix2D((cols/2 , rows/2), -90 ,1)
+            #image = cv2.warpAffine(image,M,(cols , rows)) 
             boxes = yolo.predict(image)
             image = draw_boxes(image, boxes, config['model']['labels'])
-
+            cv2.imshow('image', np.uint8(image))
+	        #cv2.imshow('image', image)
             video_writer.write(np.uint8(image))
-
         video_reader.release()
-        video_writer.release()  
+        video_writer.release()
+	        
+            #video_reader.release()
+	        #video_writer.release()  
     else:
         image = cv2.imread(image_path)
         boxes = yolo.predict(image)
@@ -89,7 +98,7 @@ def _main_(args):
 
         print(len(boxes), 'boxes are found')
 
-        cv2.imwrite(image_path[:-4] + '_detected' + image_path[-4:], image)
+        cv2.imwrite(image_path[:-4] + '_detected.jpg', image)
 
 if __name__ == '__main__':
     args = argparser.parse_args()

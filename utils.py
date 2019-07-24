@@ -63,8 +63,13 @@ def draw_boxes(image, boxes, labels):
         ymin = int(box.ymin*image_h)
         xmax = int(box.xmax*image_w)
         ymax = int(box.ymax*image_h)
-
-        cv2.rectangle(image, (xmin,ymin), (xmax,ymax), (0,255,0), 3)
+        overlay = image.copy()
+        output = image.copy()
+        alpha = 0.7
+        cv2.rectangle(overlay, (int(xmin),int(ymin)), (int(xmax),int(ymax)), (0,255,0), -1)
+        cv2.addWeighted(overlay, alpha, output, 1 - alpha,
+		0, image)
+        #cv2.rectangle(image, (xmin,ymin), (xmax,ymax), (0,255,0), 3)
         cv2.putText(image, 
                     labels[box.get_label()] + ' ' + str(box.get_score()), 
                     (xmin, ymin - 13), 
